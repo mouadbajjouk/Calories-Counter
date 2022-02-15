@@ -20,46 +20,10 @@ namespace CalorieCounterWinForm
             InitializeComponent();
         }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label8_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox2_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox3_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label7_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button1_Click(object sender, EventArgs e)
+        private void GetBMR()
         {
             try
             {
-
                 Weight = int.Parse(textBox1.Text);
                 Height = int.Parse(textBox2.Text);
                 Age = int.Parse(textBox3.Text);
@@ -80,61 +44,44 @@ namespace CalorieCounterWinForm
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            GymActivities = comboBox1.SelectedIndex;
+        }
+
+        private void SwitchOnGymActivities()
+        {
             try
             {
-                GymActivities = comboBox1.SelectedIndex;
-
-                switch (GymActivities)
+                TDEE = GymActivities switch
                 {
-                    case 0:
-                        TDEE = Convert.ToInt32(Math.Round(BMR * 1.2));
-                        break;
-                    case 1:
-                        TDEE = Convert.ToInt32(Math.Round(BMR * 1.35));
-                        break;
-                    case 2:
-                        TDEE = Convert.ToInt32(Math.Round(BMR * 1.35));
-                        break;
-                    case 3:
-                        TDEE = Convert.ToInt32(Math.Round(BMR * 1.35));
-                        break;
-                    case 4:
-                        TDEE = Convert.ToInt32(Math.Round(BMR * 1.5));
-                        break;
-                    case 5:
-                        TDEE = Convert.ToInt32(Math.Round(BMR * 1.5));
-                        break;
-                    case 6:
-                        TDEE = Convert.ToInt32(Math.Round(BMR * 1.7));
-                        break;
-                    case 7:
-                        TDEE = Convert.ToInt32(Math.Round(BMR * 1.9));
-                        break;
-                    default:
-                        break;
-                }
+                    0 => Convert.ToInt32(Math.Round(BMR * 1.2)),
+                    1 => Convert.ToInt32(Math.Round(BMR * 1.35)),
+                    2 => Convert.ToInt32(Math.Round(BMR * 1.35)),
+                    3 => Convert.ToInt32(Math.Round(BMR * 1.35)),
+                    4 => Convert.ToInt32(Math.Round(BMR * 1.5)),
+                    5 => Convert.ToInt32(Math.Round(BMR * 1.5)),
+                    6 => Convert.ToInt32(Math.Round(BMR * 1.7)),
+                    7 => Convert.ToInt32(Math.Round(BMR * 1.9)),
+                    _ => throw new ArgumentNullException(),
+                };
             }
-            catch
+            catch (Exception)
             {
                 MessageBox.Show("", "Selected value error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                throw;
             }
         }
 
-        private void label12_Click(object sender, EventArgs e)
+        private void GetTDEE()
         {
-
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
+            SwitchOnGymActivities();
             label12.Text = TDEE.ToString() + " " + "cal";
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void GetCaloriesToAdd()
         {
             try
             {
-                CaloriesToAdd = int.Parse(textBox4.Text);
+                CaloriesToAdd = string.IsNullOrWhiteSpace(textBox4.Text) ? 0 : int.Parse(textBox4.Text);
 
                 if (CaloriesToAdd < 0) throw new InvalidOperationException();
 
@@ -146,11 +93,11 @@ namespace CalorieCounterWinForm
             }
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void GetCaloriesToRemove()
         {
             try
             {
-                CaloriesToRemove = int.Parse(textBox5.Text);
+                CaloriesToRemove = string.IsNullOrWhiteSpace(textBox5.Text) ? 0 : int.Parse(textBox5.Text);
 
                 if (CaloriesToRemove < 0) throw new InvalidOperationException();
 
@@ -170,7 +117,7 @@ namespace CalorieCounterWinForm
             }
         }
 
-        private void button5_Click(object sender, EventArgs e)
+        private void GetFinalTDEE()
         {
             FinalTDEE = TDEE + CaloriesToAdd - CaloriesToRemove;
 
@@ -179,6 +126,11 @@ namespace CalorieCounterWinForm
 
         private void button6_Click(object sender, EventArgs e)
         {
+            GetBMR();
+            GetTDEE();
+            GetCaloriesToAdd();
+            GetCaloriesToRemove();
+            GetFinalTDEE();
             try
             {
                 if (FinalTDEE <= 0) throw new ArgumentOutOfRangeException();
@@ -188,6 +140,14 @@ namespace CalorieCounterWinForm
                 label21.Text = "Protein required per day:" + " " + ProteinMacro;
                 label22.Text = "Fat required per day:" + " " + FatMacro;
                 label23.Text = "Carbs required per day:" + " " + CarbsMacro;
+
+                label24.Text = Math.Round((double)ProteinMacro / GymActivities).ToString() + "g of protein per meal";
+                label25.Text = Math.Round((double)FatMacro / GymActivities).ToString() + "g of fat per meal";
+
+                var carbsHalf = (double)CarbsMacro / 2;
+
+                label27.Text = Math.Round(carbsHalf / GymActivities).ToString() + "g of carbs per meal (away from gym session)";
+                label28.Text = Math.Round(carbsHalf / 2 / GymActivities).ToString() + "g of carbs before and after gym session";
             }
             catch
             {
@@ -237,8 +197,6 @@ namespace CalorieCounterWinForm
                 default:
                     break;
             }
-
-
         }
     }
 }
